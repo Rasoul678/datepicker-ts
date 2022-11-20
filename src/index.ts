@@ -1,65 +1,48 @@
-import { getWeekNumber } from "./utils";
+import { Day } from "./day";
+import { isLeapYear } from "./utils";
 
-class Day {
-  Date: Date;
-  date: number;
-  day: string;
-  dayAsNumber: number;
-  dayAsShort: string;
+class Month {
+  lang: string;
+  name: string;
+  number: number;
   year: number;
-  yearAsShort: number;
-  month: string;
-  monthAsShort: string;
-  monthAsNumber: number;
-  timestamp: number;
-  week: number;
+  numberOfDays: number;
 
   constructor(date: Date = null, lang = "default") {
-    date = date ?? new Date();
+    const day = new Day(date, lang);
+    const monthSize = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    this.Date = date;
-    this.date = date.getDate();
-    this.day = date.toLocaleString(lang, { weekday: "long" });
-    this.dayAsNumber = date.getDay() + 1;
-    this.dayAsShort = date.toLocaleString(lang, { weekday: "short" });
-    this.year = date.getFullYear();
-    this.yearAsShort = Number(date.toLocaleString(lang, { year: "2-digit" }));
-    this.month = date.toLocaleString(lang, { month: "long" });
-    this.monthAsShort = date.toLocaleString(lang, { month: "short" });
-    this.monthAsNumber = Number(
-      date.toLocaleString(lang, { month: "2-digit" })
-    );
-    this.timestamp = date.getTime();
-    this.week = getWeekNumber(date);
+    this.lang = lang;
+    this.name = day.month;
+    this.number = day.monthAsNumber;
+    this.year = day.year;
+    this.numberOfDays = monthSize[this.number - 1];
+
+    if (this.number === 2) {
+      this.numberOfDays += isLeapYear(this.year) ? 1 : 0;
+    }
   }
 
-  get isToday() {
-    return this.isEqualTo(new Date());
-  }
+  [Symbol.iterator] = function* () {
+    let number = 1;
 
-  private isEqualTo(date: Date | Day) {
-    date = date instanceof Day ? date.Date : date;
+    yield this.getDay(number);
 
-    return (
-      date.getDate() === this.date &&
-      date.getMonth() === this.monthAsNumber - 1 &&
-      date.getFullYear() === this.year
-    );
-  }
+    while (number < this.numberOfDays) {
+      ++number;
+      yield this.getDay(number);
+    }
+  };
 
-  format(formatString: string) {
-    return formatString
-      .replace(/\bYYYY\b/, this.year.toString())
-      .replace(/\bYYY\b/, this.yearAsShort.toString())
-      .replace(/\bWW\b/, this.week.toString().padStart(2, "0"))
-      .replace(/\bW\b/, this.week.toString())
-      .replace(/\bDDDD\b/, this.day)
-      .replace(/\bDDD\b/, this.dayAsShort)
-      .replace(/\bDD\b/, this.date.toString().padStart(2, "0"))
-      .replace(/\bD\b/, this.date.toString())
-      .replace(/\bMMMM\b/, this.month)
-      .replace(/\bMMM\b/, this.monthAsShort)
-      .replace(/\bMM\b/, this.monthAsNumber.toString().padStart(2, "0"))
-      .replace(/\bM\b/, this.monthAsNumber.toString());
+  getDay(date: number) {
+    return new Day(new Date(this.year, this.number + 1, date), this.lang);
   }
+}
+
+const month = new Month();
+
+console.log([...month], month.getDay(13));
+
+for (let day of month) {
+  console.log(day.date);
 }
