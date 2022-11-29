@@ -1,6 +1,6 @@
 import { isLeapYear } from "./utils";
-import { Day } from "./_day";
-import { Month } from "./_month";
+import { Day } from "./Day";
+import { Month } from "./Month";
 
 export class Calendar {
   today: Day;
@@ -8,6 +8,7 @@ export class Calendar {
   month: Month;
   lang: string;
   weekDays: string[] = Array.from({ length: 7 });
+  iterator: any = [Symbol.iterator]
 
   constructor(
     year: number = null,
@@ -17,7 +18,7 @@ export class Calendar {
     this.today = new Day(null, lang);
     this.year = year ?? this.today.year;
     this.month = new Month(
-      new Date(this.year, (monthNumber || this.today.monthAsNumber) - 1),
+      new Date(this.year, (monthNumber || this.today.monthNumber) - 1),
       lang
     );
     this.lang = lang;
@@ -26,28 +27,28 @@ export class Calendar {
       const day = this.month.getDay(i);
 
       if (!this.weekDays.includes(day.day)) {
-        this.weekDays[day.dayAsNumber - 1] = day.day;
+        this.weekDays[day.dayNumber - 1] = day.day;
       }
     });
-  }
 
-  [Symbol.iterator] = function* () {
-    let number = 1;
+    this.iterator = function* () {
+      let number = 1;
 
-    yield this.getMonth(number);
-
-    while (number < 12) {
-      ++number;
       yield this.getMonth(number);
-    }
-  };
 
-  getMonth(monthNumber: number) {
-    return new Month(new Date(this.year, monthNumber - 1), this.lang);
+      while (number < 12) {
+        ++number;
+        yield this.getMonth(number);
+      }
+    };
   }
 
   get isLeapYear() {
     return isLeapYear(this.year);
+  }
+
+  getMonth(monthNumber: number) {
+    return new Month(new Date(this.year, monthNumber - 1), this.lang);
   }
 
   getPreviousMonth() {
@@ -86,10 +87,7 @@ export class Calendar {
       return this.goToNextYear();
     }
 
-    this.month = new Month(
-      new Date(this.year, this.month.number + 2),
-      this.lang
-    );
+    this.month = new Month(new Date(this.year, this.month.number), this.lang);
   }
 
   goToPreviousMonth() {

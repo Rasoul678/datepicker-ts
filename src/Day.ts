@@ -4,13 +4,13 @@ export class Day {
     Date: Date;
     date: number;
     day: string;
-    dayAsNumber: number;
-    dayAsShort: string;
+    dayNumber: number;
+    dayShort: string;
     year: number;
-    yearAsShort: number;
+    yearShort: number;
     month: string;
-    monthAsShort: string;
-    monthAsNumber: number;
+    monthShort: string;
+    monthNumber: number;
     timestamp: number;
     week: number;
   
@@ -20,15 +20,13 @@ export class Day {
       this.Date = date;
       this.date = date.getDate();
       this.day = date.toLocaleString(lang, { weekday: "long" });
-      this.dayAsNumber = date.getDay() + 1;
-      this.dayAsShort = date.toLocaleString(lang, { weekday: "short" });
+      this.dayNumber = date.getDay() + 1;
+      this.dayShort = date.toLocaleString(lang, { weekday: "short" });
       this.year = date.getFullYear();
-      this.yearAsShort = Number(date.toLocaleString(lang, { year: "2-digit" }));
+      this.yearShort = Number(date.toLocaleString(lang, { year: "2-digit" }));
       this.month = date.toLocaleString(lang, { month: "long" });
-      this.monthAsShort = date.toLocaleString(lang, { month: "short" });
-      this.monthAsNumber = Number(
-        date.toLocaleString(lang, { month: "2-digit" })
-      );
+      this.monthShort = date.toLocaleString(lang, { month: "short" });
+      this.monthNumber = date.getMonth() + 1;
       this.timestamp = date.getTime();
       this.week = getWeekNumber(date);
     }
@@ -37,12 +35,12 @@ export class Day {
       return this.isEqualTo(new Date());
     }
   
-    private isEqualTo(date: Date | Day) {
+    isEqualTo(date: Date | Day) {
       date = date instanceof Day ? date.Date : date;
   
       return (
         date.getDate() === this.date &&
-        date.getMonth() === this.monthAsNumber - 1 &&
+        date.getMonth() === this.monthNumber - 1 &&
         date.getFullYear() === this.year
       );
     }
@@ -50,16 +48,16 @@ export class Day {
     format(formatString: string) {
       return formatString
         .replace(/\bYYYY\b/, this.year.toString())
-        .replace(/\bYYY\b/, this.yearAsShort.toString())
+        .replace(/\bYYY\b/, this.yearShort.toString())
         .replace(/\bWW\b/, this.week.toString().padStart(2, "0"))
         .replace(/\bW\b/, this.week.toString())
         .replace(/\bDDDD\b/, this.day)
-        .replace(/\bDDD\b/, this.dayAsShort)
+        .replace(/\bDDD\b/, this.dayShort)
         .replace(/\bDD\b/, this.date.toString().padStart(2, "0"))
         .replace(/\bD\b/, this.date.toString())
         .replace(/\bMMMM\b/, this.month)
-        .replace(/\bMMM\b/, this.monthAsShort)
-        .replace(/\bMM\b/, this.monthAsNumber.toString().padStart(2, "0"))
-        .replace(/\bM\b/, this.monthAsNumber.toString());
+        .replace(/\bMMM\b/, this.monthShort)
+        .replace(/\bMM\b/, this.monthNumber.toString().padStart(2, "0"))
+        .replace(/\bM\b/, this.monthNumber.toString());
     }
   }
